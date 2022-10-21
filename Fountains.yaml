@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Fountains Project APIs
+  description: |
+    This API allows to use the "Fountains App".
+    The “Fountains app allows citizens and tourists
+    to explore nearby drinking fountains, and see their location and status.
+    Also, the user can be able to change the status or location of any fountains,
+    add missing fountains in the app and remove those that are no more present
+  version: 0.0.1
+paths:
+  /fountains:
+    post:
+      summary: create a fountain
+      description: |
+        Create a new fountain
+      parameters:
+        - name: address
+          in: query
+          required: true
+          description: the address
+          schema:
+            type: string
+        - name: longitude
+          in: query
+          required: true
+          description: the longitude
+          schema:
+            type: integer
+            minimum: -180
+            maximum: 180
+        - name: latitude
+          in: query
+          required: true
+          description: the latitude
+          schema:
+            type: integer
+            minimum: -90
+            maximum: 90
+        - name: status
+          in: query
+          required: true
+          description: status of the fountain
+          schema:
+            type: string
+            enum:
+              - good
+              - faulty
+      responses:
+        "201":
+          description: |
+            New fountain has been created
+        "403":
+          description: |
+            Can't overwrite fountain
+    get:
+      summary: List all Fountains, or a range of Fountains
+      description: |
+        obtain the list of all fountains, with their coordinates
+      parameters:
+        - name: lat
+          in: query
+          required: false
+          description: latitude of the fountain
+          schema:
+            type: number
+            format: float
+            minimum: -90
+            maximum: 90
+        - name: long
+          in: query
+          description: longitude of the fountain
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: -180
+            maximum: 180
+        - name: range
+          in: query
+          required: false
+          description: |
+            Range for the location filter. If coordinates are not specified, this parameter is ignored
+          schema:
+            type: number
+            format: float
+            minimum: 1
+            maximum: 200
+
+      responses:
+        "200":
+          description: |
+            An array of objects, each one containing the address, latitude,
+            longitude and status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/fountain"
+  /fountains/{id}: # id potrebbe essere una tupla lat, long
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: this is the fountain id
+        schema:
+          type: object
+          properties:
+            longitude:  
+              type: integer
+              minimum: -180
+              maximum: 180
+            latitude:
+              type: integer
+              minimum: -90
+              maximum: 90
+    get:
+      summary: info of the fountain
+      description: |
+        Return the address, the latitude, the longitude and the status of the fountain
+      responses:
+        "200":
+          description: |
+            The fountain actually exists, returning the information
+          content:
+            application/json:
+              schema:
+                $ref : "#/components/schemas/fountain"
+        "404":
+          description: |
+            The fountain doesn't exist.
+      
+      
+    delete:
+      summary: Remove permanently the fountain
+      description: |
+        
+        The fountain has been removed
+      responses:
+        "204":
+          description: |
+            The fountain has been removed
+        "404":
+          description: |
+            The fountain hasn't been found
+    
+
+    
+    put:
+      summary: Modify information 
+      description: |
+        Modify information of the fountain
+      parameters:
+        - name: status
+          in: query
+          required: true
+          description: status of the fountain
+          schema:
+            type: string
+            enum:
+            - good
+            - faulty
+      responses:
+        "200":
+          description: |
+            Fountain info succesfully modified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/fountain"
+        
+        "404":
+          description: |
+            Fountain not found
+      
+
+
+
+components:
+  schemas:
+
+
+    fountain:
+      type: object
+      properties:
+        address:
+          type: string
+        longitude:
+          type: integer
+          minimum: -180
+          maximum: 180
+        latitude:
+          type: integer
+          minimum: -90
+          maximum: 90
+          # Controlla se si può usare $ref
+        status:
+          type: string
+          enum:
+          - good
+          - faulty
